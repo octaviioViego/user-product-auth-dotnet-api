@@ -1,9 +1,25 @@
-Este repositorio contiene una serie de prácticas para aprender y desarrollar APIs REST con .Net. Se incluyen ejercicios de configuración del entorno, creación de modelos, autenticación, manejo de vistas, serialización de datos y pruebas. Ideal para quienes desean profundizar en el desarrollo backend con .Net.
+# Información del proyecto
+
+Este repositorio contiene prácticas y ejemplos para aprender y desarrollar APIs REST con .NET.  
+Incluye ejercicios de:
+
+- Configuración del entorno
+- Creación de modelos y entidades
+- Autenticación y manejo de tokens
+- Serialización de datos y manejo de vistas
+- Pruebas y validaciones
+- Buenas prácticas de diseño aplicando los principios SOLID
+
+Este proyecto es ideal para quienes desean profundizar en el desarrollo backend con .NET y mejorar sus habilidades en arquitectura y diseño de software.
 
 ### Tecnologías utilizadas
-- **.NET**
+- **.NET 7**
 - **C#**
-- **Postgrest**
+- **PostgreSQL**
+- **Swagger / OpenAPI**
+- **Entity Framework Core** (ORM)
+- **JWT** (Autenticación)
+- **Git / GitHub** (Control de versiones)
 
 ### Requisitos Previos:
 Antes de ejecutar el proyecto, es necesario instalar **.NET**. Puedes descargarlo e instalarlo desde el [sitio web oficial](https://dotnet.microsoft.com/es-es/download). Ademas de instalar Postgrest en tu computadora.
@@ -36,16 +52,5 @@ Antes de ejecutar el proyecto, es necesario instalar **.NET**. Puedes descargarl
   
 5. **Disfruta**.
 
-## Contacto para el proyecto
-Si estás interesado en cómo se realizó este proyecto paso a paso por favor contacta a:
-
-**Dr. José Luis Quiroz Fabian**
-- **Número de cubículo**: T-169
-- **Ubicación**: Edificio T de CBI, Universidad Autónoma Metropolitana Unidad Iztapalapa
-- **Telefono**: 58 04 46 00 ext. 1169
-
-
-Realizado por:
-José Luis Quiroz Fabian. 
-Javier Clara Martinez.
-Fernando Octavio Arroyo Velasco.
+## Autor
+- Fernando Octavio Arroyo Velasco
