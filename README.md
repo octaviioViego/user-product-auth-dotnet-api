@@ -12,7 +12,7 @@ Incluye ejercicios de:
 
 Este proyecto es ideal para quienes desean profundizar en el desarrollo backend con .NET y mejorar sus habilidades en arquitectura y diseño de software.
 
-### Tecnologías utilizadas
+# Tecnologías utilizadas
 - **.NET 7**
 - **C#**
 - **PostgreSQL**
@@ -21,7 +21,7 @@ Este proyecto es ideal para quienes desean profundizar en el desarrollo backend 
 - **JWT** (Autenticación)
 - **Git / GitHub** (Control de versiones)
 
-### Requisitos Previos:
+# Requisitos Previos:
 Antes de ejecutar el proyecto, es necesario instalar **.NET**. Puedes descargarlo e instalarlo desde el [sitio web oficial](https://dotnet.microsoft.com/es-es/download). Ademas de instalar Postgrest en tu computadora.
 
 ### Pasos para Ejecutar el Proyecto:
@@ -52,5 +52,7 @@ Antes de ejecutar el proyecto, es necesario instalar **.NET**. Puedes descargarl
   
 5. **Disfruta**.
 
-## Autor
-- Fernando Octavio Arroyo Velasco
+# Información extra
+- **Autor:** Fernando Octavio Arroyo Velasco
+- **Formación:** Estudiante de Ingeniería de Software
+- **Universidad:** Universidad Autónoma de la Ciudad de México (UACM)
