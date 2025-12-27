@@ -3,10 +3,10 @@ using productos.Methods;
 public class ProductService : IProductService
 {
     private readonly IProductDAO _iProductDAO;
-    private readonly ProductMapper _productMapper;
+    private readonly IProductMapper _productMapper;
     
 
-    public ProductService(IProductDAO iProductDAO, ProductMapper productMapper)
+    public ProductService(IProductDAO iProductDAO, IProductMapper productMapper)
     {
         _iProductDAO = iProductDAO;
         _productMapper = productMapper;
