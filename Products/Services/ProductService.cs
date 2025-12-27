@@ -6,10 +6,10 @@ public class ProductService : IProductService
     private readonly IProductMapper _productMapper;
     
 
-    public ProductService(IProductDAO iProductDAO, IProductMapper productMapper)
+    public ProductService(IProductDAO iProductDAO, IProductMapper iproductMapper)
     {
         _iProductDAO = iProductDAO;
-        _productMapper = productMapper;
+        _productMapper = iproductMapper;
     }
 
     /// <summary>
