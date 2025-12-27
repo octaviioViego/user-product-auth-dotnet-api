@@ -1,6 +1,6 @@
 using productos.Models;
 
-public class ProductMapper
+public class ProductMapper:IProductMapper
 {
     /// <summary>
     /// Convierte un objeto de tipo Product a ProductDTO.
