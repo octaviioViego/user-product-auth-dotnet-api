@@ -48,5 +48,15 @@ public class ProductMapper
             product_key = product.Product_key,
             image_link = product.image_link 
         };
-    }    
+    }
+
+    public ProductoResponseDTO productoResponseDTO(ProductDTO productDTO)
+    {
+        return new ProductoResponseDTO
+        {
+            name = productDTO.name,
+            type = productDTO.type,
+            price = productDTO.price,
+        };
+    }
 }

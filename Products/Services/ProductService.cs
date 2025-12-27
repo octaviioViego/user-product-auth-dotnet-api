@@ -1,11 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using productos.Models;
 using productos.Methods;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Authentication.BearerToken;
 
 public class ProductService : IProductService
 {
@@ -23,23 +16,35 @@ public class ProductService : IProductService
     /// <summary>
     /// Obtiene todos los productos de la base de datos.
     /// </summary>
-    public async Task<IActionResult> GetAllProductsAsync(int? safePage,int? safeLimit,string? sort,string? safeOrder,bool? safeStatus,bool? safeIsdelete,string? type)
+    public async Task<ResponseGetProducts<List<ProductDTO>>> GetAllProductsAsync(ProductsQueryDTO productsQueryDTO)
     {
     
-        if(!safePage.HasValue && !safeLimit.HasValue && string.IsNullOrEmpty(sort) && string.IsNullOrEmpty(safeOrder) && !safeStatus.HasValue && !safeIsdelete.HasValue && string.IsNullOrEmpty(type))
+        if(!productsQueryDTO.Page.HasValue 
+            && !productsQueryDTO.Limit.HasValue 
+            && string.IsNullOrEmpty(productsQueryDTO.Sort) 
+            && string.IsNullOrEmpty(productsQueryDTO.Order)
+            && !productsQueryDTO.Status.HasValue
+            && !productsQueryDTO.isDeleted.HasValue
+            && string.IsNullOrEmpty(productsQueryDTO.Type))
         {
-            safeIsdelete = false;
+            productsQueryDTO.isDeleted = false;
         }
 
         
-        SentenciaProductos crearSentencia = new SentenciaProductos(safePage,safeLimit,sort,safeOrder,safeStatus,safeIsdelete,type);
+        SentenciaProductos crearSentencia = new SentenciaProductos(productsQueryDTO.Page,
+                                                                   productsQueryDTO.Limit,
+                                                                   productsQueryDTO.Sort,
+                                                                   productsQueryDTO.Order,
+                                                                   productsQueryDTO.Status,
+                                                                   productsQueryDTO.isDeleted,
+                                                                   productsQueryDTO.Type);
         var sentencia = crearSentencia.CrearSenentiaSQLProduct();
 
         var products = await _iProductDAO.GetProducts(sentencia.Sentencia,sentencia.Parametros);  
         
         if (products == null || !products.Any())
         {
-           return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("Productos404")));  
+            throw new BusinessException(404, MessageService.Instance.GetMessage("Productos404"));  
         }
 
         
@@ -53,37 +58,46 @@ public class ProductService : IProductService
         /// <summary>
         /// Lanza un ok 200 y regresa una respuesta de tipo ResponseGetProducts que a su ves regresa los productos.
         /// </summary>    
-        return new OkObjectResult(new ApiResponse<ResponseGetProducts<List<ProductDTO>>>(200,MessageService.Instance.GetMessage("Productos200"), 
-        new ResponseGetProducts<List<ProductDTO>>(numResult, sentencia.valores[6], sentencia.valores[5], result, sentencia.valores[3], sentencia.valores[4], sentencia.valores[0], sentencia.valores[1], sentencia.valores[2])));
+        // return new OkObjectResult(new ApiResponse<ResponseGetProducts<List<ProductDTO>>>(200,MessageService.Instance.GetMessage("Productos200"), 
+        // new ResponseGetProducts<List<ProductDTO>>(numResult, sentencia.valores[6], sentencia.valores[5], result, sentencia.valores[3], sentencia.valores[4], sentencia.valores[0], sentencia.valores[1], sentencia.valores[2])));
+        return new ResponseGetProducts<List<ProductDTO>>(numResult, 
+                                                         sentencia.valores[6], 
+                                                         sentencia.valores[5], 
+                                                         result, 
+                                                         sentencia.valores[3], 
+                                                         sentencia.valores[4], 
+                                                         sentencia.valores[0], 
+                                                         sentencia.valores[1], 
+                                                         sentencia.valores[2]);
 
     }
 
     /// <summary>
     /// Recuperar un producto por id.
     /// </summary>
-    public async Task<IActionResult> GetProductByIdAsync(Guid id)
+    public async Task<ProductDTO> GetProductByIdAsync(Guid id)
     {
         var product = await _iProductDAO.GetByIdAsync(id); 
         if (product == null)
         {
-            return new NotFoundObjectResult(new ApiResponse<string>(404,"Producto no encontrado."));  
+            throw new BusinessException(404, MessageService.Instance.GetMessage("Productos404"));  
         }
 
 
         // Mapear el producto a DTO antes de devolverlo
         var result = _productMapper.ToDTO(product);
-        return new OkObjectResult(new ApiResponse<ProductDTO>(200,"Producto encontrado",result));  
+        return result;
     }
 
     /// <summary>
     /// Crear un nuevo producto.
     /// </summary>
-    public async Task<IActionResult> CreateProductAsync(ProductCreateDTO productDTO)
+    public async Task<ProductoResponseDTO> CreateProductAsync(ProductCreateDTO productDTO)
     {
         
         if (productDTO.price <= 0)
         {
-            return new BadRequestObjectResult(new ApiResponse<string>(400, MessageService.Instance.GetMessage("controllerProductDTO400"), "El precio debe ser mayor a 0."));
+             throw new BusinessException(400, MessageService.Instance.GetMessage("controllerProductDTO400"));  
         }
 
         // Crear entidad usando el Mapper
@@ -93,30 +107,26 @@ public class ProductService : IProductService
     
         var result = _productMapper.ToDTO(product);
 
-        var respuestaDTO = new ProductoResponseDTO{
-            name = result.name,
-            type = result.type,
-            price = result.price,
-        };
-
-        return new OkObjectResult(new ApiResponse<ProductoResponseDTO>(200,MessageService.Instance.GetMessage("Productoscreate200"),respuestaDTO));
+        var respuestaDTO = _productMapper.productoResponseDTO(result);
+        
+        return respuestaDTO;
     }
 
 
     /// <summary>
     /// Actualizar un producto.
     /// </summary>
-    public async Task<IActionResult> Put(Guid id, ProductUpdateDTO productUpdateDTO)
+    public async Task<string> Put(Guid id, ProductUpdateDTO productUpdateDTO)
     {
         var product = await _iProductDAO.GetByIdAsync(id);
         if (product == null)
         {
-            return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("ProductUpdate404")));  
+             throw new BusinessException(404, MessageService.Instance.GetMessage("ProductUpdate404"));  
         }
         
         if(productUpdateDTO.price <= 0)  
         {
-            return new BadRequestObjectResult(new ApiResponse<string>(400,MessageService.Instance.GetMessage("ProductUpdate400")));  
+            throw new BusinessException(400, MessageService.Instance.GetMessage("ProductUpdate400"));  
         }
         
         // Actualizar solo los campos proporcionados en el DTO, preservando los que no se proporcionan
@@ -134,30 +144,31 @@ public class ProductService : IProductService
         // Guardar el producto actualizado
         await _iProductDAO.UpdateAsync(product);
 
-        return new OkObjectResult(new ApiResponse<string>(200,MessageService.Instance.GetMessage("ProductUpdate200")));  // Producto actualizado correctamente
+        return "ProductUpdate200";
     }
 
 
     /// <summary>
     /// Actualizar un producto parcialmente.
     /// </summary>
-    public async Task<IActionResult> Patch(Guid id, ProductPartialUpdateDTO productPartialUpdate)
+    public async Task<string> Patch(Guid id, ProductPartialUpdateDTO productPartialUpdate)
     {
         // Buscar el producto por ID en la base de datos
         var product = await _iProductDAO.GetByIdAsync(id);
         
         if (product == null)
         {
-            return new NotFoundObjectResult(new ApiResponse<string>(404, MessageService.Instance.GetMessage("ProductPartialUpdate404")));
+            throw new BusinessException(404, MessageService.Instance.GetMessage("ProductPartialUpdate404"));  
         }
 
         if(product.is_deleted)
         {
-            return new BadRequestObjectResult(new ApiResponse<string>(400, MessageService.Instance.GetMessage("ProductPartialUpdate400")));
+            throw new BusinessException(400, MessageService.Instance.GetMessage("ProductPartialUpdate400"));  
         }
         
-        if(productPartialUpdate.price <= 0){
-            return new BadRequestObjectResult(new ApiResponse<string>(400, MessageService.Instance.GetMessage("controllerProductDTO400")));
+        if(productPartialUpdate.price <= 0)
+        {
+            throw new BusinessException(400, MessageService.Instance.GetMessage("controllerProductDTO400"));  
         }
 
         // Actualización parcial: solo se modifican los valores que no sean null en el DTO
@@ -175,154 +186,169 @@ public class ProductService : IProductService
         // Guardar los cambios en la base de datos
         await _iProductDAO.UpdateAsync(product);
 
-        return new OkObjectResult(new ApiResponse<string>(200, MessageService.Instance.GetMessage("ProductPartialUpdate200")));
+        return "ProductPartialUpdate200";
     }
 
 
     /// <summary>
     /// Eliminado logico.
     /// </summary>
-    public async Task<IActionResult> DeleteProduct(Guid id)
+    public async Task<string> DeleteProduct(Guid id)
     {
         var product = await _iProductDAO.GetByIdAsync(id);
         if (product == null)
         {
-            return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("DeleteProduct404"))); 
+            throw new BusinessException(404, MessageService.Instance.GetMessage("DeleteProduct404"));  
         }
+
         //Si el producto ya se encuantra eliminado no se puede volver a eliminar.
-        if(product.is_deleted){
-            return new BadRequestObjectResult(new ApiResponse<string>(400,MessageService.Instance.GetMessage("DeleteProduct400"))); 
+        if(product.is_deleted)
+        {
+            throw new BusinessException(400, MessageService.Instance.GetMessage("DeleteProduct400"));  
         }
 
         product.is_deleted = true;
         product.deleted_at = DateTimeOffset.UtcNow;
 
         await _iProductDAO.UpdateAsync(product);
-        return new OkObjectResult(new ApiResponse<string>(200,MessageService.Instance.GetMessage("DeleteProduct200"))); 
+        return "DeleteProduct200";
+        
     }
 
 
     /// <summary>
     /// Recuperacion de productos eliminados.
     /// </summary>
-    public async Task<IActionResult> RestoreProduct(Guid id)
+    public async Task<string> RestoreProduct(Guid id)
     {
         var product = await _iProductDAO.GetByIdAsync(id);
         if (product == null)
         {
-            return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("RestoreProduct404"))); 
+            throw new BusinessException(404, MessageService.Instance.GetMessage("RestoreProduct404"));  
         }
         //Si es producto no esta elimindo no se puede restaurar.
         if (!product.is_deleted)
         {
-            return new BadRequestObjectResult(new ApiResponse<string>(400,MessageService.Instance.GetMessage("RestoreProduct400"))); 
+            throw new BusinessException(400, MessageService.Instance.GetMessage("RestoreProduct400"));  
         }
 
         product.is_deleted = false;
         product.deleted_at = null;
 
         await _iProductDAO.UpdateAsync(product);
-
-        return new OkObjectResult(new ApiResponse<string>(200,MessageService.Instance.GetMessage("RestoreProduct200"))); 
+        
+        return "RestoreProduct200";
     }
 
     /// <summary>
     //  buscar por nombre o descripcion.
     /// </summary>
-    public async Task<IActionResult> GetProductsSearh(string search){
+    public async Task<List<ProductDTO>> GetProductsSearh(string search){
         
         var products = await _iProductDAO.GetProductsSearh(search);
         
         if (products == null || products.Count == 0)
         {
-            return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("ProductsSearh404")));
+            throw new BusinessException(404, MessageService.Instance.GetMessage("ProductsSearh404"));  
         }
         // Mapear los productos a DTO (si es necesario) antes de enviarlos en la respuesta
+        
         var result = products.Select(p => _productMapper.ToDTO(p)).ToList();
-
-        return new OkObjectResult(new ApiResponse<List<ProductDTO>>(200,MessageService.Instance.GetMessage("ProductsSearh200"),result));  
+        return result;
+        
     }
 
 
     /// <summary>
     //  Listar productos por rango de precios.
     /// </summary>
-    public async Task<IActionResult> GetProductsPrice(decimal min_price, decimal max_price)
+    public async Task<List<ProductDTO>> GetProductsPrice(decimal min_price, decimal max_price)
     {
+        
+         if (min_price <= 0)
+         {
+            throw new BusinessException(400, MessageService.Instance.GetMessage("controllerProductsPrice400"));  
+        }
+
+         if (max_price < min_price)
+         {
+             throw new BusinessException(400, MessageService.Instance.GetMessage("controllerProductsPrice400"));  
+        }
+
         var product = await _iProductDAO.GetProductsPrice(min_price,max_price);
         
-        if(product == null || !product.Any()){
-            return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("ProductsPrice404"))); 
+        if(product == null || !product.Any())
+        {
+            throw new BusinessException(404, MessageService.Instance.GetMessage("ProductsPrice404"));  
         }
 
         var result = product.Select(p => _productMapper.ToDTO(p)).ToList();
+        return result;
         
-        return new OkObjectResult(new ApiResponse<List<ProductDTO>>(200,MessageService.Instance.GetMessage("ProductsPrice200"),result));
     }
 
     /// <summary>
     //  Actualizar imagen.
     /// </summary> 
-    public async Task<IActionResult> UpdateImage(Guid id, ProductUpdateImageDTO updateImage){
+    public async Task<string> UpdateImage(Guid id, ProductUpdateImageDTO updateImage){
         
         var existingProduct = await _iProductDAO.GetByIdAsync(id);
         if (existingProduct == null)
         {
-              return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("UpdateImage404"))); 
+            throw new BusinessException(404, MessageService.Instance.GetMessage("UpdateImage404"));  
         }
 
         existingProduct.image_link = updateImage.image_link;
 
         await _iProductDAO.UpdateAsync(existingProduct);
-        
-        return new OkObjectResult(new ApiResponse<string>(200,MessageService.Instance.GetMessage("UpdateImage200")));  
+        return "UpdateImage200";
     }
 
     /// <summary>
     //  Desactivar un producto.
     /// </summary> 
-    public async Task<IActionResult> DeactivateProduct(Guid id){
+    public async Task<string> DeactivateProduct(Guid id){
 
         var product = await _iProductDAO.GetByIdAsync(id);
         
         if (product == null)
         {
-             return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("DeactivateProduct404")));  
+            throw new BusinessException(404, MessageService.Instance.GetMessage("DeactivateProduct404"));  
         }
 
         if (!product.status)
         {
-            return new BadRequestObjectResult(new ApiResponse<string>(400,MessageService.Instance.GetMessage("DeactivateProduct400")));  
+            throw new BusinessException(400, MessageService.Instance.GetMessage("DeactivateProduct400"));  
         }
 
         // Realizamos la desactivación lógica
         product.status = false;
 
         await _iProductDAO.UpdateAsync(product);
-        return new OkObjectResult(new ApiResponse<string>(200,MessageService.Instance.GetMessage("DeactivateProduct200")));  
+        
+        return "DeactivateProduct200";
     }
 
     /// <summary>
     //  Activar un producto.
     /// </summary> 
-    public async Task<IActionResult> ActivateProduct(Guid id)
+    public async Task<string> ActivateProduct(Guid id)
     {
         var product = await _iProductDAO.GetByIdAsync(id);
         if (product == null)
         {
-            return new NotFoundObjectResult(new ApiResponse<string>(404,MessageService.Instance.GetMessage("ActivateProduct404")));  
+            throw new BusinessException(404, MessageService.Instance.GetMessage("ActivateProduct404"));  
         }
 
         if (product.status)
         {
-            return new BadRequestObjectResult(new ApiResponse<string>(400,MessageService.Instance.GetMessage("ActivateProduct400")));  
+            throw new BusinessException(400, MessageService.Instance.GetMessage("ActivateProduct400"));  
         }
 
         // Activación lógica del producto
         product.status = true;
         await _iProductDAO.UpdateAsync(product);
-        
-        return new OkObjectResult(new ApiResponse<string>(200,MessageService.Instance.GetMessage("ActivateProduct200")));  
+        return "ActivateProduct200";
     }
 
 }

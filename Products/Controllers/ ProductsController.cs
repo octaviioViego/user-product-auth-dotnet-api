@@ -1,15 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using productos.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 
 [Route("api/product")]
 [Authorize(AuthenticationSchemes = "Bearer")]
 [ApiController]
-public class ProductController : ControllerBase
+public class ProductController : ControllerBase , IProductsController
 {
     private readonly IProductService _iProductService;
 
@@ -22,38 +19,13 @@ public class ProductController : ControllerBase
     /// Obtiene los productos de la base de datos con parametros opcionales.
     /// </summary>
     [HttpGet("product")]
-    public async Task<IActionResult> GetAll2(int? page,int? limit,string? sort,string? order,bool? status,bool? is_deleted,string? type)
+    public async Task<IActionResult> GetAll2(ProductsQueryDTO productsQueryDTO)
     {
         try{
 
-            if(!(sort == null)){
-                if(!(sort == "name" || sort =="price" || sort == "created_at" || sort == "type" || sort == "status")){
-                    return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controller400")));
-                }
-                
-            }
-
-            if(!(order == null)){
-                if(!(order == "desc" || order == "asc")){
-                    return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controller400")));
-                }
-            }
-
-            if(!(page==null)){
-                if(page < 1){
-                    return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controller400")));
-                }
-            }
-
-            if(!(limit==null)){
-                if(limit < 1){
-                    return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controller400")));
-                }
-            }
-
-            var result = await _iProductService.GetAllProductsAsync(page,limit,sort,order,status,is_deleted,type);
-            return result;
-        
+            var result = await _iProductService.GetAllProductsAsync(productsQueryDTO);
+            return  Ok(new ApiResponse<ResponseGetProducts<List<ProductDTO>>>(200,MessageService.Instance.GetMessage("Productos200"), result));
+            
         }catch(Exception ex){
             Console.WriteLine("Error 500: " + ex);
             return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
@@ -67,13 +39,9 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Get(Guid id)
     {
         try{
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400"))); 
-            }
 
             var result = await _iProductService.GetProductByIdAsync(id);  
-            return result;  
+            return Ok(new ApiResponse<ProductDTO>(200,"Producto encontrado",result)); 
 
         }catch(Exception ex){
             Console.WriteLine("Error 500: " + ex);
@@ -88,17 +56,9 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Post([FromBody] ProductCreateDTO productDTO)
     {
         try{
-            if (productDTO == null)
-            {
-                return BadRequest(new ApiResponse<string>(404,MessageService.Instance.GetMessage("controllerProductDTO400")));  
-            }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new ApiResponse<string>(404,MessageService.Instance.GetMessage("controllerProductDTO400")));  
-            }
             var result = await _iProductService.CreateProductAsync(productDTO);
-            return result;  
+            return Ok(new ApiResponse<ProductoResponseDTO>(200,MessageService.Instance.GetMessage("Productoscreate200"),result));  
         }
         catch (Exception ex)
         {   
@@ -114,23 +74,10 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Put(Guid id, [FromBody] ProductUpdateDTO productUpdateDTO)
     {
         try{
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400")));  
-            }
-
-            if (productUpdateDTO == null)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerProductDTO400")));  
-            }
-            
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerProductDTO400")));  
-            }
         
             var result = await _iProductService.Put(id, productUpdateDTO);
-            return result;
+            return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result))); 
+ 
         }
         catch (Exception ex)
         {
@@ -146,18 +93,10 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Patch(Guid id, [FromBody] ProductPartialUpdateDTO productPartialUpdate)
     {
         try{
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400")));  
-            }
-
-            if (productPartialUpdate == null)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerProductDTO400")));  
-            }
 
             var result = await _iProductService.Patch(id, productPartialUpdate);
-            return result;
+            return Ok(new ApiResponse<string>(200, MessageService.Instance.GetMessage(result)));
+   
         }
         catch (Exception ex)
         {
@@ -173,12 +112,9 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
         try{
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400")));  
-            }
+        
             var result = await _iProductService.DeleteProduct(id);
-            return result;
+            return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result))); 
 
         }catch(Exception ex){
             Console.WriteLine("Error 500: " + ex);
@@ -195,13 +131,10 @@ public class ProductController : ControllerBase
     {   
         try
         {
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400")));
-            }
 
             var result = await _iProductService.RestoreProduct(id);
-            return result; 
+            return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result))); 
+ 
         }
         catch (Exception ex)
         {
@@ -217,14 +150,9 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> GetProductsSearch(string search)
     {
         try{
-
-            if (string.IsNullOrEmpty(search))
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerIsNullOrEmpty400")));  
-            }
         
             var result = await _iProductService.GetProductsSearh(search);
-            return result;
+            return Ok(new ApiResponse<List<ProductDTO>>(200,MessageService.Instance.GetMessage("ProductsSearh200"),result));  
         }
         catch (Exception ex)
         {
@@ -240,19 +168,10 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> GetProductsPrice(decimal min_price,decimal max_price)
     {
         try{
-            if (min_price <= 0)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerProductsPrice400"))); 
-            }
-
-            if (max_price < min_price)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerProductsPrice400")));
-            }
-
-        
+            
             var result = await _iProductService.GetProductsPrice(min_price,max_price);
-            return result;
+            return Ok(new ApiResponse<List<ProductDTO>>(200,MessageService.Instance.GetMessage("ProductsPrice200"),result));
+    
 
         }catch(Exception ex){
             Console.WriteLine("Error 500: " + ex);
@@ -268,18 +187,10 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> UpdateImage(Guid id, [FromBody] ProductUpdateImageDTO updateImage)
     {   
         try{
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400")));
-            }
-
-            if (updateImage == null)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerProductDTO400")));
-            }
-        
+           
             var result = await _iProductService.UpdateImage(id, updateImage);
-            return result;
+            return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result)));  
+
         }
         catch (Exception ex)
         {
@@ -295,13 +206,10 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> DeactivateProduct(Guid id)
     {
         try{
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400")));
-            }
             
             var result = await _iProductService.DeactivateProduct(id);
-            return result; 
+            return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result)));  
+ 
         
         }catch(Exception ex){
             Console.WriteLine("Error 500: " + ex);
@@ -318,13 +226,10 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> ActivateProduct(Guid id)
     {
         try{        
-            if (id == Guid.Empty)
-            {
-                return BadRequest(new ApiResponse<string>(400,MessageService.Instance.GetMessage("controllerGuidEmpty400")));
-            }
-
+            
             var result = await _iProductService.ActivateProduct(id);
-            return result;  
+            return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result)));  
+  
 
         }catch(Exception ex){
             Console.WriteLine("Error 500: " + ex);
