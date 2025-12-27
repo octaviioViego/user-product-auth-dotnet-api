@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 [Route("auth")]
 [AllowAnonymous]
-public class AuthController : ControllerBase
+public class AuthController : ControllerBase, IAuthController
 {
     private readonly IAuthService _authService;
 
