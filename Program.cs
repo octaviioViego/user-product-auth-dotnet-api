@@ -49,7 +49,7 @@ builder.Services.AddScoped<PasswordResetEmail>();
 builder.Services.AddScoped<IProductDAO, ProductDAO>(); 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ProductMapper>();
-builder.Services.AddScoped<CreateProductMapper>();
+//builder.Services.AddScoped<CreateProductMapper>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 

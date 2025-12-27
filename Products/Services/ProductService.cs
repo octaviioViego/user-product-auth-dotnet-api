@@ -4,13 +4,12 @@ public class ProductService : IProductService
 {
     private readonly IProductDAO _iProductDAO;
     private readonly ProductMapper _productMapper;
-    private readonly CreateProductMapper _createProductoMapper;
+    
 
-    public ProductService(IProductDAO iProductDAO, ProductMapper productMapper, CreateProductMapper createProductoMapper)
+    public ProductService(IProductDAO iProductDAO, ProductMapper productMapper)
     {
         _iProductDAO = iProductDAO;
         _productMapper = productMapper;
-        _createProductoMapper = createProductoMapper;
     }
 
     /// <summary>
@@ -90,7 +89,7 @@ public class ProductService : IProductService
         }
 
         // Crear entidad usando el Mapper
-        var product = _createProductoMapper.ToEntity(productDTO);
+        var product = _productMapper.CreateProductMapper(productDTO);
 
         await _iProductDAO.AddAsync(product);
     

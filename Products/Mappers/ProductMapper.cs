@@ -93,4 +93,27 @@ public class ProductMapper
         product.modified_at = DateTimeOffset.UtcNow;
         return product;
     }
+
+    public Product CreateProductMapper(ProductCreateDTO productDTO)
+    {
+        return new Product
+        {
+            id = Guid.NewGuid(),
+            created_at = DateTimeOffset.UtcNow,
+            modified_at = DateTimeOffset.UtcNow,
+            is_deleted = false,
+            deleted_at = null,
+            status = true, 
+            type = productDTO.type,
+            name = productDTO.name,
+            price = productDTO.price,
+            description = productDTO.text,
+            image_link = productDTO.image_link, 
+
+            // Si 'ProductKey' es nulo o vacío, generar una clave única de 8 caracteres a partir de un GUID.
+            product_key = string.IsNullOrEmpty(productDTO.Product_key) 
+                ? Guid.NewGuid().ToString("N").Substring(0, 8)  
+                : productDTO.Product_key
+        };
+    }
 }
