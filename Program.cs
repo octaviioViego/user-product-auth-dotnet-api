@@ -42,7 +42,7 @@ builder.Services.AddDbContext<DataContextProduct>(
 /// </summary>
 builder.Services.AddScoped<IUsuarioDAO,UsuarioDAO>();
 builder.Services.AddScoped<UsuarioMapper>();
-builder.Services.AddScoped<CreateUserMapper>();
+//builder.Services.AddScoped<CreateUserMapper>();
 builder.Services.AddScoped<IUsuarioService,UsuarioService>(); // Aquí agregamos UsuarioService
 builder.Services.AddScoped<PasswordResetEmail>();
 

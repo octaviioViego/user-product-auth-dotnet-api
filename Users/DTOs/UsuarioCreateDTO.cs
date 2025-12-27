@@ -12,7 +12,7 @@ public class UsuarioCreateDTO
     [Required]
     [EmailAddress(ErrorMessage = "El email no es válido")]
     public required string email { get; set; }
-    
+
     [Required]
     public required string first_name { get; set; }
     [Required]

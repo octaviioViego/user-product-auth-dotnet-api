@@ -32,8 +32,8 @@ public class AuthService : IAuthService
         * variable ok después verificamos que el ok.Value sea de tipo Usuario y lo
         * guardamos en una variable de tipo user.
         */ 
-
-        if (result is not OkObjectResult ok || ok.Value is not Usuario user)
+        
+        if (result is not Usuario user)
             return new ApiResponse<TokenResponse>(401,"Credenciales inválidas");
             
 

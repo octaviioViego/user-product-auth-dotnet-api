@@ -4,8 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 public class UsuarioService : IUsuarioService
 {
     private readonly IUsuarioDAO _iUsuarioDAO; 
-    private readonly UsuarioMapper _usuarioMapper; 
-    private readonly CreateUserMapper _createUserMapper; 
+    private readonly IUsuarioMapper _usuarioMapper;
     private readonly PasswordResetEmail _emailService; // Inyectar EmailService
 
 
@@ -14,11 +13,10 @@ public class UsuarioService : IUsuarioService
     /// </summary>
     /// <param name="usuarioDAO">El DAO para la interacción con la base de datos.</param>
     /// <param name="usuarioMapper">El mapper para convertir entre entidades y DTOs.</param>
-    public UsuarioService(IUsuarioDAO iUsuarioDAO, UsuarioMapper usuarioMapper, CreateUserMapper createUserMapper, PasswordResetEmail emailService)
+    public UsuarioService(IUsuarioDAO iUsuarioDAO, IUsuarioMapper usuarioMapper, PasswordResetEmail emailService)
     {
         _iUsuarioDAO = iUsuarioDAO;
         _usuarioMapper = usuarioMapper;
-        _createUserMapper = createUserMapper;
         _emailService = emailService; // Asignar en el constructor
     }
 
@@ -138,7 +136,7 @@ public class UsuarioService : IUsuarioService
              throw new BusinessException(409, MessageService.Instance.GetMessage("AddAsyncUser409"));
         }
         
-        var usuario = _createUserMapper.ToEntity(usuarioCreateDTO); 
+        var usuario = _usuarioMapper.CreateUser(usuarioCreateDTO); //_createUserMapper.ToEntity(usuarioCreateDTO); 
         var usuarioDTO = _usuarioMapper.ToDTO(usuario);
         
         await _iUsuarioDAO.AddAsync(usuario); 

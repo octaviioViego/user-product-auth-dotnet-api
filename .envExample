@@ -1,0 +1,5 @@
+LOGGING__LOGLEVEL__DEFAULT=Information
+LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=Warning
+ALLOWEDHOSTS=*
+CONNECTIONSTRINGS__DEFAULTCONNECTIONPRODUCTS=Host="Numero de host"; Port="Puerto"; Database="Nombre de base de datos"; Username="Nombre de usuario"; Password="Contraseña"
+CONNECTIONSTRINGS__DEFAULTCONNECTIONUSERS=Host="Numero de host"; Port="Puerto"; Database="Nombre de base de datos"; Username="Nombre de usuario"; Password="Contraseña"
