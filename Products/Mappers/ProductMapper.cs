@@ -59,4 +59,38 @@ public class ProductMapper
             price = productDTO.price,
         };
     }
+
+    public Product toPut(Product product, ProductUpdateDTO productUpdateDTO)
+    {
+        
+            // Actualizar solo los campos proporcionados en el DTO, preservando los que no se proporcionan
+            product.type = productUpdateDTO.type;  
+            product.name = productUpdateDTO.name;  
+            product.price = productUpdateDTO.price; 
+            product.status = productUpdateDTO.status; 
+
+            // Los campos opcionales solo se actualizan si el cliente proporciona un valor
+            product.description = productUpdateDTO.text ?? product.description; 
+            product.image_link = productUpdateDTO.image_link ?? product.image_link;
+
+            product.modified_at = DateTimeOffset.UtcNow; // Actualizamos la fecha de modificación
+            
+            return product;
+    }
+
+    public Product toPacth(Product product, ProductPartialUpdateDTO productPartialUpdate)
+    {
+        // Actualización parcial: solo se modifican los valores que no sean null en el DTO
+        product.type = productPartialUpdate.type ?? product.type;
+        product.name = productPartialUpdate.name ?? product.name;
+        product.price = productPartialUpdate.price ?? product.price;
+        product.status = productPartialUpdate.status ?? product.status;
+        product.description = productPartialUpdate.text ?? product.description;
+        product.product_key = productPartialUpdate.Product_key ?? product.product_key;
+        product.image_link = productPartialUpdate.image_lick ?? product.image_link; 
+
+        // Registrar la última modificación
+        product.modified_at = DateTimeOffset.UtcNow;
+        return product;
+    }
 }

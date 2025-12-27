@@ -30,14 +30,7 @@ public class ProductService : IProductService
             productsQueryDTO.isDeleted = false;
         }
 
-        
-        SentenciaProductos crearSentencia = new SentenciaProductos(productsQueryDTO.Page,
-                                                                   productsQueryDTO.Limit,
-                                                                   productsQueryDTO.Sort,
-                                                                   productsQueryDTO.Order,
-                                                                   productsQueryDTO.Status,
-                                                                   productsQueryDTO.isDeleted,
-                                                                   productsQueryDTO.Type);
+        SentenciaProductos crearSentencia = new SentenciaProductos(productsQueryDTO);
         var sentencia = crearSentencia.CrearSenentiaSQLProduct();
 
         var products = await _iProductDAO.GetProducts(sentencia.Sentencia,sentencia.Parametros);  
@@ -46,8 +39,6 @@ public class ProductService : IProductService
         {
             throw new BusinessException(404, MessageService.Instance.GetMessage("Productos404"));  
         }
-
-        
         
         //Contamos el numero de resultados
         var numResult = products.Count();
@@ -56,10 +47,8 @@ public class ProductService : IProductService
         var result = products.Select(p => _productMapper.ToDTO(p)).ToList();
         
         /// <summary>
-        /// Lanza un ok 200 y regresa una respuesta de tipo ResponseGetProducts que a su ves regresa los productos.
+        /// Respuesta de tipo ResponseGetProducts que a su ves regresa los productos.
         /// </summary>    
-        // return new OkObjectResult(new ApiResponse<ResponseGetProducts<List<ProductDTO>>>(200,MessageService.Instance.GetMessage("Productos200"), 
-        // new ResponseGetProducts<List<ProductDTO>>(numResult, sentencia.valores[6], sentencia.valores[5], result, sentencia.valores[3], sentencia.valores[4], sentencia.valores[0], sentencia.valores[1], sentencia.valores[2])));
         return new ResponseGetProducts<List<ProductDTO>>(numResult, 
                                                          sentencia.valores[6], 
                                                          sentencia.valores[5], 
@@ -129,20 +118,9 @@ public class ProductService : IProductService
             throw new BusinessException(400, MessageService.Instance.GetMessage("ProductUpdate400"));  
         }
         
-        // Actualizar solo los campos proporcionados en el DTO, preservando los que no se proporcionan
-        product.type = productUpdateDTO.type;  
-        product.name = productUpdateDTO.name;  
-        product.price = productUpdateDTO.price; 
-        product.status = productUpdateDTO.status; 
-
-        // Los campos opcionales solo se actualizan si el cliente proporciona un valor
-        product.description = productUpdateDTO.text ?? product.description; 
-        product.image_link = productUpdateDTO.image_link ?? product.image_link;
-
-        product.modified_at = DateTimeOffset.UtcNow; // Actualizamos la fecha de modificación
-
+        var prodcutoPut = _productMapper.toPut(product,productUpdateDTO);
         // Guardar el producto actualizado
-        await _iProductDAO.UpdateAsync(product);
+        await _iProductDAO.UpdateAsync(prodcutoPut);
 
         return "ProductUpdate200";
     }
@@ -171,20 +149,9 @@ public class ProductService : IProductService
             throw new BusinessException(400, MessageService.Instance.GetMessage("controllerProductDTO400"));  
         }
 
-        // Actualización parcial: solo se modifican los valores que no sean null en el DTO
-        product.type = productPartialUpdate.type ?? product.type;
-        product.name = productPartialUpdate.name ?? product.name;
-        product.price = productPartialUpdate.price ?? product.price;
-        product.status = productPartialUpdate.status ?? product.status;
-        product.description = productPartialUpdate.text ?? product.description;
-        product.product_key = productPartialUpdate.Product_key ?? product.product_key;
-        product.image_link = productPartialUpdate.image_lick ?? product.image_link; 
-
-        // Registrar la última modificación
-        product.modified_at = DateTimeOffset.UtcNow;
-
+        var productPatch = _productMapper.toPacth(product,productPartialUpdate);
         // Guardar los cambios en la base de datos
-        await _iProductDAO.UpdateAsync(product);
+        await _iProductDAO.UpdateAsync(productPatch);
 
         return "ProductPartialUpdate200";
     }
@@ -214,7 +181,6 @@ public class ProductService : IProductService
         return "DeleteProduct200";
         
     }
-
 
     /// <summary>
     /// Recuperacion de productos eliminados.

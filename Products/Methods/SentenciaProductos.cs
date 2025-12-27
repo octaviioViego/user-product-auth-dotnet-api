@@ -15,15 +15,15 @@ namespace productos.Methods{
         string sentencia = "SELECT * FROM \"products\" WHERE 1=1 ";
 
         // Primary Constructor
-        public SentenciaProductos(int? page, int? limit, string? sort, string? order, bool? status, bool? is_delete, string? type)
-        {
-            Page = page;
-            Limit = limit;
-            Sort = sort;
-            Order = order;
-            Status = status;
-            Is_delete = is_delete;
-            Type = type;
+        public SentenciaProductos(ProductsQueryDTO productsQueryDTO)
+        {   
+            Page = productsQueryDTO.Page;
+            Limit = productsQueryDTO.Limit;
+            Sort = productsQueryDTO.Sort;
+            Order = productsQueryDTO.Order;
+            Status = productsQueryDTO.Status;
+            Is_delete = productsQueryDTO.isDeleted;
+            Type = productsQueryDTO.Type;
         }
 
         public (string Sentencia, DynamicParameters Parametros, object[] valores) CrearSenentiaSQLProduct()
