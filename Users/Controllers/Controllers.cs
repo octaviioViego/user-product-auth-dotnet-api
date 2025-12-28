@@ -28,14 +28,16 @@ public class usersController : ControllerBase , IControllers
             var usuarios = await _iUsuarioService.GetAllAsync2( query.Page,query.Limit, 
                                                                 query.Sort,query.Order,
                                                                 query.IsActive,query.IsDeleted, 
-                                                                query.IsSuperuser,query.EmailVerified);  
+                                                                query.IsSuperuser,query.EmailVerified);
+              
 
             return new OkObjectResult(new ApiResponse<ResponseGetUsers<List<UsuarioDTO>>>(200,MessageService.Instance.GetMessage("getAlluser200"),usuarios)); 
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500, MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -50,10 +52,12 @@ public class usersController : ControllerBase , IControllers
             var usuario = await _iUsuarioService.GetByIdAsync(id);
             return Ok(new ApiResponse<UsuarioDTO>(200,MessageService.Instance.GetMessage("GetByIdAsyncUser200"),usuario));
                 
-        }
-        catch(Exception ex){
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500 , new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
         
     }
@@ -68,11 +72,12 @@ public class usersController : ControllerBase , IControllers
         {
             var usuario = await _iUsuarioService.AddAsync(usuarioCreateDTO);
             return new CreatedResult("", new ApiResponse<UsuarioDTOResponceExtends>(201, MessageService.Instance.GetMessage("AddAsyncUser201"),usuario));
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
         
     }
@@ -87,11 +92,12 @@ public class usersController : ControllerBase , IControllers
         {        
             var updatedUser = await _iUsuarioService.UpdateAsync(id,usuarioUpdate);
             return Ok(new ApiResponse<UsuarioDTOResponceExtends>(200,MessageService.Instance.GetMessage("UpdateAsyncUser200"),updatedUser));
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine("Error 500: "+ ex);
-            return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -107,11 +113,12 @@ public class usersController : ControllerBase , IControllers
             var existingUser = await _iUsuarioService.DeleteAsync(id);
             return  Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(existingUser)));
         
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
         
     }
@@ -126,11 +133,12 @@ public class usersController : ControllerBase , IControllers
             
              var existingUser = await _iUsuarioService.UpdatePartialAsync(id,usuarioDTO);
              return Ok(new ApiResponse<UsuarioDTOResponceExtends>(200,MessageService.Instance.GetMessage("UpdatePartialAsyncUser200"),existingUser));
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -145,10 +153,12 @@ public class usersController : ControllerBase , IControllers
             var usuarioRestaurado = await _iUsuarioService.RestoreUserAsync(id);
             return Ok(new ApiResponse<UsuarioDTO>(200,MessageService.Instance.GetMessage("RestoreUserAsyncUser200"),usuarioRestaurado));
 
-        }catch (Exception ex)
-        {
-            Console.WriteLine("Error 500:" + ex);
-            return StatusCode(500, new ApiResponse<string>(500, MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -162,11 +172,12 @@ public class usersController : ControllerBase , IControllers
         {
             var usuarioVerificado = await _iUsuarioService.VerifyEmailAsync(id); 
             return Ok(new ApiResponse<UsuarioDTOVerifiedEmail>(200,MessageService.Instance.GetMessage("VerifyEmailAsyncUser200"),usuarioVerificado));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500, MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -181,9 +192,12 @@ public class usersController : ControllerBase , IControllers
             var activarUsuario = await _iUsuarioService.ActiveteUserAsync(id);
             return  Ok(new ApiResponse<UsuarioDTOResponce>(200,MessageService.Instance.GetMessage("ActivateUserUser200"),activarUsuario));
         
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
         }catch(Exception ex){
-            Console.WriteLine("Error 500: "+ ex);
-            return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUser500")));
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
     
@@ -197,11 +211,12 @@ public class usersController : ControllerBase , IControllers
         {
             var usuario = await _iUsuarioService.DeactivateUserAsync(id);
             return Ok(new ApiResponse<UsuarioDTOResponce>(200,MessageService.Instance.GetMessage("DeactivateUserAsyncUser200"),usuario));
-        }
-        catch(Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -216,11 +231,12 @@ public class usersController : ControllerBase , IControllers
             
             var result = await _iUsuarioService.ChangePasswordAsync(id, model);
             return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result)));  
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500, MessageService.Instance.GetMessage("controllerUser500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
         
     }

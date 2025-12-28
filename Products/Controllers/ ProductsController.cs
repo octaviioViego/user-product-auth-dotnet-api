@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-
 
 [Route("api/product")]
 [Authorize(AuthenticationSchemes = "Bearer")]
@@ -19,17 +17,19 @@ public class ProductController : ControllerBase , IProductsController
     /// Obtiene los productos de la base de datos con parametros opcionales.
     /// </summary>
     [HttpGet("product")]
-    public async Task<IActionResult> GetAll2(ProductsQueryDTO productsQueryDTO)
+    public async Task<IActionResult> GetAll2([FromQuery] ProductsQueryDTO productsQueryDTO)
     {
-        try{
-
+       try{
             var result = await _iProductService.GetAllProductsAsync(productsQueryDTO);
             return  Ok(new ApiResponse<ResponseGetProducts<List<ProductDTO>>>(200,MessageService.Instance.GetMessage("Productos200"), result));
+       
+       }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
             
-        }catch(Exception ex){
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
-        }
+       }catch(Exception ex){
+             Console.WriteLine("Error 500: " + ex);
+             return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
+       }
     }
 
     /// <summary>
@@ -43,9 +43,12 @@ public class ProductController : ControllerBase , IProductsController
             var result = await _iProductService.GetProductByIdAsync(id);  
             return Ok(new ApiResponse<ProductDTO>(200,"Producto encontrado",result)); 
 
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
         }catch(Exception ex){
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetProduct500")));  
+             Console.WriteLine("Error 500: " + ex);
+             return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -59,11 +62,12 @@ public class ProductController : ControllerBase , IProductsController
 
             var result = await _iProductService.CreateProductAsync(productDTO);
             return Ok(new ApiResponse<ProductoResponseDTO>(200,MessageService.Instance.GetMessage("Productoscreate200"),result));  
-        }
-        catch (Exception ex)
-        {   
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerPost500")));  
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+             Console.WriteLine("Error 500: " + ex);
+             return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -78,11 +82,12 @@ public class ProductController : ControllerBase , IProductsController
             var result = await _iProductService.Put(id, productUpdateDTO);
             return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result))); 
  
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerPut500")));  
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+             Console.WriteLine("Error 500: " + ex);
+             return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -97,11 +102,12 @@ public class ProductController : ControllerBase , IProductsController
             var result = await _iProductService.Patch(id, productPartialUpdate);
             return Ok(new ApiResponse<string>(200, MessageService.Instance.GetMessage(result)));
    
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerPatch500")));  
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -116,9 +122,12 @@ public class ProductController : ControllerBase , IProductsController
             var result = await _iProductService.DeleteProduct(id);
             return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result))); 
 
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
         }catch(Exception ex){
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerDeleteProduct500")));  
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
         
     }
@@ -135,11 +144,12 @@ public class ProductController : ControllerBase , IProductsController
             var result = await _iProductService.RestoreProduct(id);
             return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result))); 
  
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerRestoreProduct500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }  
 
@@ -153,11 +163,12 @@ public class ProductController : ControllerBase , IProductsController
         
             var result = await _iProductService.GetProductsSearh(search);
             return Ok(new ApiResponse<List<ProductDTO>>(200,MessageService.Instance.GetMessage("ProductsSearh200"),result));  
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetProductsSearch500")));  
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -191,11 +202,12 @@ public class ProductController : ControllerBase , IProductsController
             var result = await _iProductService.UpdateImage(id, updateImage);
             return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result)));  
 
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerUpdateImage500")));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 
@@ -211,9 +223,12 @@ public class ProductController : ControllerBase , IProductsController
             return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result)));  
  
         
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
         }catch(Exception ex){
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerDeactivateProduct500")));
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
         
 
@@ -231,9 +246,12 @@ public class ProductController : ControllerBase , IProductsController
             return Ok(new ApiResponse<string>(200,MessageService.Instance.GetMessage(result)));  
   
 
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
         }catch(Exception ex){
-            Console.WriteLine("Error 500: " + ex);
-            return StatusCode(500, new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerActivateProduct500")));
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("controllerGetAll500")));
         }
     }
 }

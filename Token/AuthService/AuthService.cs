@@ -1,12 +1,7 @@
 using System.Security.Claims;
-using apitienda.Data;
 using apitienda.DTOs;
-using Microsoft.EntityFrameworkCore;
-
-using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using apitienda.Models;
-using Microsoft.IdentityModel.Tokens;
 
 public class AuthService : IAuthService
 {
@@ -22,7 +17,7 @@ public class AuthService : IAuthService
     // =========================
     // LOGIN
     // =========================
-    public async Task<ApiResponse<TokenResponse>> LoginAsync(string email , string password)
+    public async Task<TokenResponse> LoginAsync(string email , string password)
     {
         // Usamos el código legado de User
         var result = await _usuarioService.ValidateUserAsync(email, password);
@@ -34,25 +29,24 @@ public class AuthService : IAuthService
         */ 
         
         if (result is not Usuario user)
-            return new ApiResponse<TokenResponse>(401,"Credenciales inválidas");
-            
+            throw new BusinessException(401, MessageService.Instance.GetMessage("Credenciales inválidas"));
+             
 
         var accessToken = _jwtService.GenerateAccessToken(user.id, user.email);
         var refreshToken = _jwtService.GenerateRefreshToken(user.id);
-
-        return  new ApiResponse<TokenResponse>(200,"Usuario encontrado",BuildResponse(accessToken, refreshToken));
+        return BuildResponse(accessToken, refreshToken);
         
     }
 
     // =========================
     // REFRESH TOKEN
     // =========================
-    public async Task<ApiResponse<TokenResponse>> RefreshAsync(string refreshToken)
+    public async Task<TokenResponse> RefreshAsync(string refreshToken)
     {
         var principal = _jwtService.ValidateToken(refreshToken);
 
         if (principal.FindFirst("type")?.Value != "refresh")
-            return new ApiResponse<TokenResponse>(404,"No es refresh token");
+            throw new BusinessException(404, MessageService.Instance.GetMessage("No es refresh token"));
 
         var jti = principal.FindFirst(JwtRegisteredClaimNames.Jti)!.Value;
         var userId = Guid.Parse(principal.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
@@ -75,8 +69,7 @@ public class AuthService : IAuthService
         //  Emitir nuevos tokens
         var newAccess = _jwtService.GenerateAccessToken(userId, email);
         var newRefresh = _jwtService.GenerateRefreshToken(userId);
-
-        return new ApiResponse<TokenResponse>(200,"Token refresh generado",BuildResponse(newAccess, newRefresh)); 
+        return BuildResponse(newAccess, newRefresh);
     }
 
     private TokenResponse BuildResponse(string accessToken, string refreshToken)

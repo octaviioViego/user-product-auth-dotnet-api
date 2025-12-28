@@ -14,24 +14,40 @@ public class AuthController : ControllerBase, IAuthController
         _authService = authService;
     }
 
+
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest dto)
     {
-        var tokens = await _authService.LoginAsync(dto.Email, dto.Password);
-        if(tokens.Codigo == 200)
-            return Ok(tokens);    
+        try{
+            
+            var tokens = await _authService.LoginAsync(dto.Email, dto.Password);
+            return  Ok(new ApiResponse<TokenResponse>(200,"Usuario encontrado",tokens));
         
-        return new UnauthorizedObjectResult(new ApiResponse<String>(401,tokens.Mensaje));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("Tokens 500")));
+        }
     }
+
 
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(RefreshRequest dto)
     {
-        var tokens = await _authService.RefreshAsync(dto.RefreshToken);
-        if (tokens.Codigo == 200)
-            return Ok(tokens);
+        try{
+            
+            var tokens = await _authService.RefreshAsync(dto.RefreshToken);
+            return  Ok(new ApiResponse<TokenResponse>(200,"Usuario encontrado",tokens));
         
-        return new NotFoundObjectResult(new ApiResponse<String>(404,tokens.Mensaje));
+        }catch (BusinessException ex){
+             return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
+            
+        }catch(Exception ex){
+                Console.WriteLine("Error 500: " + ex);
+                return StatusCode(500,new ApiResponse<string>(500,MessageService.Instance.GetMessage("Tokens 500")));
+        }
     }
 
 }
