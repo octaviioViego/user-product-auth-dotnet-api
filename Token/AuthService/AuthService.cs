@@ -29,7 +29,7 @@ public class AuthService : IAuthService
         */ 
         
         if (result is not Usuario user)
-            throw new BusinessException(401, MessageService.Instance.GetMessage("Credenciales inválidas"));
+            throw new BusinessException(401, MessageService.Instance.GetMessage("authUser401"));
              
 
         var accessToken = _jwtService.GenerateAccessToken(user.id, user.email);
@@ -65,7 +65,7 @@ public class AuthService : IAuthService
                     ?? principal.FindFirst(JwtRegisteredClaimNames.Email)?.Value 
                     ?? ""; // O búscalo en la BD con el userId
         
-        Console.WriteLine($"El email si lo saca: {email}");
+       // Console.WriteLine($"El email si lo saca: {email}");
         //  Emitir nuevos tokens
         var newAccess = _jwtService.GenerateAccessToken(userId, email);
         var newRefresh = _jwtService.GenerateRefreshToken(userId);

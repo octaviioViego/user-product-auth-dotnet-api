@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("apitienda")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+48f4ac415969561ded574be4696c32fd4e9387d0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+61301b4d375600e8590d567a073feae54300b428")]
 [assembly: System.Reflection.AssemblyProductAttribute("apitienda")]
 [assembly: System.Reflection.AssemblyTitleAttribute("apitienda")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

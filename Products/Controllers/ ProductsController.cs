@@ -23,6 +23,7 @@ public class ProductController : ControllerBase , IProductsController
             var result = await _iProductService.GetAllProductsAsync(productsQueryDTO);
             return  Ok(new ApiResponse<ResponseGetProducts<List<ProductDTO>>>(200,MessageService.Instance.GetMessage("Productos200"), result));
        
+       
        }catch (BusinessException ex){
              return StatusCode(ex.StatusCode,new ApiResponse<string>(ex.StatusCode, ex.Message));
             
